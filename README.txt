@@ -12,3 +12,6 @@ AOS API Access
 Delivery Source FTP Access
 1.  Update the url, folder where you want delivery data posted (or leave as "" to put data in root), username and password in SAMPLE_ftpcredentials.json
 2.  Save as "ftpcredentials.json" (remove SAMPLE_ prefix) in the same location as project
+
+Run
+1.  Execute autodelivery.py
