@@ -9,9 +9,10 @@ AOS API Access
 3.  If using an environment other than Staging, update the authurl and apiurl
 4.  Save as "aosapicredentials.json" (remove SAMPLE_ prefix) in the same location as project
 
-Delivery Source FTP Access
-1.  Update the url, folder where you want delivery data posted (or leave as "" to put data in root), username and password in SAMPLE_ftpcredentials.json
-2.  Save as "ftpcredentials.json" (remove SAMPLE_ prefix) in the same location as project
+FTP Access
+1.  For AOS Delivery Source, update the url, folder, username and password in SAMPLE_ftpcredentials.json in aos_ftp
+2.  For Staq upload, update the url, folder, username and password in SAMPLE_ftpcredentials.json in staq_ftp
+3.  Save as "ftpcredentials.json" (remove SAMPLE_ prefix) in the same location as project
 
 Run
 1.  Execute autodelivery.py

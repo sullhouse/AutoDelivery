@@ -167,11 +167,15 @@ while True:
             print(contents_csv_row)
             contents.append(contents_csv_row)
 
-# Upload data as csv to FTP
+# Upload data as csv to AOS FTP
 suffix = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-if generate_primary_delivery: primary_delivery_filename = upload_file_to_ftp('Primary', suffix, primary_deliverydata, delete_from_local_after_upload)
-if generate_third_party_delivery: third_party_delivery_filename = upload_file_to_ftp('ThirdParty', suffix, third_party_deliverydata, delete_from_local_after_upload)
-if generate_primary_delivery or generate_third_party_delivery: contents_filename = upload_file_to_ftp('Contents', suffix, contents, delete_from_local_after_upload)
+if generate_primary_delivery: primary_delivery_filename = upload_file_to_ftp('Primary', suffix, primary_deliverydata, delete_from_local_after_upload, 'aos_ftp')
+if generate_third_party_delivery: third_party_delivery_filename = upload_file_to_ftp('ThirdParty', suffix, third_party_deliverydata, delete_from_local_after_upload, 'aos_ftp')
+if generate_primary_delivery or generate_third_party_delivery: contents_filename = upload_file_to_ftp('Contents', suffix, contents, delete_from_local_after_upload, 'aos_ftp')
+
+# Upload data to Staq
+if generate_primary_delivery and upload_data_to_staq: upload_file_to_ftp(aos_api_connection['tenantname'] + '_Primary', suffix, primary_deliverydata, delete_from_local_after_upload, 'staq_ftp')
+if generate_third_party_delivery and upload_data_to_staq: upload_file_to_ftp(aos_api_connection['tenantname'] + '_ThirdParty', suffix, third_party_deliverydata, delete_from_local_after_upload, 'staq_ftp')
 
 # Trigger delivery pulls via API
 if call_aos_data_pull and generate_primary_delivery: trigger_primary_delivery_pull(aos_api_connection, delivery_source_id, primary_delivery_filename)

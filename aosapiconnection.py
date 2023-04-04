@@ -17,6 +17,7 @@ def get_aos_api_connection():
     aos_api_connection['token'] = authjson['token']
     aos_api_connection['apiurl'] = creds['apiurl']
     aos_api_connection['apikey'] = creds['apikey']
+    aos_api_connection['tenantname'] = creds['tenantname']
     aos_api_connection['headers'] = {"Authorization": "Bearer " + aos_api_connection['token']}
 
     return aos_api_connection

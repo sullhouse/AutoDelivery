@@ -1,2 +1,4 @@
 aosapicredentials.json
 ftpcredentials.json
+.vscode/*
+__pycache__/*
