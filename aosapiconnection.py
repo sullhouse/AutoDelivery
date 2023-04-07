@@ -22,6 +22,34 @@ def get_aos_api_connection():
 
     return aos_api_connection
 
+def get_workstreams(aos_api_connection, page_num, date_range_start_to_process, date_range_end_to_process, external_system_ids_to_process, deal_id_to_process):
+    workstream_search_filter = {"startDate":date_range_start_to_process,"endDate":date_range_end_to_process,"externalSystemIds":external_system_ids_to_process}
+    if deal_id_to_process > 0: workstream_search_filter.update({"dealSequenceId": deal_id_to_process})
+
+    url = 'https://' + aos_api_connection['apiurl'] + '/orders/v1/' + aos_api_connection['apikey'] + '/workstreams/_search'
+    workstream_search_filter.update({"pageNumber": page_num, "pageSize": 100})
+    workstreamresponse = requests.post(url, json=workstream_search_filter, headers=aos_api_connection['headers'])
+    #print(f"Status Code: {workstreamresponse.status_code}, Response: {workstreamresponse.json()}")
+    
+    # If there are workstreams return them
+    if "workstreams" in workstreamresponse.text:
+        workstreams = json.loads(workstreamresponse.text)["workstreams"]
+    else:
+        workstreams = []
+
+    return workstreams
+
+def get_lineitems(aos_api_connection, workstream_id):
+    url = 'https://' + aos_api_connection['apiurl'] + '/orders/v1/' + aos_api_connection['apikey'] + '/lines/_search'
+    lineitemresponse = requests.post(url, json={
+    "workstreamId":workstream_id,
+    "performanceView":True
+    }, headers=aos_api_connection['headers'])
+    #print(f"Status Code: {lineitemresponse.status_code}, Response: {lineitemresponse.json()}")
+    lineitems = json.loads(lineitemresponse.text)["lineItems"]
+
+    return lineitems
+
 def trigger_primary_delivery_pull(aos_api_connection, delivery_source_id, filename):
      # Trigger primary delivery pull via API
     url = 'https://' + aos_api_connection['apiurl'] + '/ingress/v2/' + aos_api_connection['apikey'] + '/ingest/inlinePayload'
