@@ -7,19 +7,17 @@ from deliverydata import *
 import datetime
 import random
 
+# Establish an API connection to AOS
 aos_api_connection = get_aos_api_connection()
-#print(token)
 
 # Prep deliverydata output for csv, and create a place to log contents for contents csv
 primary_deliverydata = []
 primary_deliverydata.append(primary_delivery_csv_header)
 
 third_party_deliverydata = []
-third_party_delivery_csv_header = 'Production System ID,Production System Name,Delivered Date,Advertiser ID,Advertiser Name,Order ID,Order Name,Line Item ID,Line Item Name,Unit Type 1,Delivered Quantity 1,Unit Type 2,Delivered Quantity 2,Start Date,End Date,Associated Production System ID,Associated Production System Name,Associated Line Item ID,Associated Line Item Name'
 third_party_deliverydata.append(third_party_delivery_csv_header)
 
 contents = []
-contents_csv_header = 'Primary Production System ID,Primary Production System Name,Advertiser ID,Advertiser Name,Order ID,Order Name,Start Date,End Date,Primary Line Item Count,Third Party Line Item Count'
 print(contents_csv_header)
 contents.append(contents_csv_header)
 
@@ -31,6 +29,7 @@ else:
     earliest_delivery_start_date = datetime.datetime.strptime(earliest_delivery_start_date, "%Y-%m-%d").date()
     latest_delivery_end_date = datetime.datetime.strptime(latest_delivery_end_date, "%Y-%m-%d").date()
 
+# Create all the delivery data as csv
 page_num=0
 while True:
     page_num += 1

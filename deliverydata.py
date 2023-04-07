@@ -1,11 +1,7 @@
-# Define primary delivery csv header
 import datetime
 import random
 
-
-primary_delivery_csv_header = 'Production System ID,Production System Name,Delivered Date,Advertiser ID,Advertiser Name,Order ID,Order Name,Line Item ID,Line Item Name,Unit Type 1,Delivered Quantity 1,Unit Type 2,Delivered Quantity 2,Start Date,End Date,Unit Cost,Cost Method,Associated Sales Line Item ID'
-
-# Get primary delivery csv row from a lineitem
+# Get data needed from a lineitem to create a delivery line item
 def get_deliverylineitem(lineitem, unit_types_to_process, workstream, generate_third_party_delivery):
     if 'everPushCompleted' in lineitem and lineitem['everPushCompleted'] == True and lineitem['unitType']['name'].lower() in unit_types_to_process and lineitem['pushQuantity'] > 10:
                 
@@ -33,6 +29,7 @@ def get_deliverylineitem(lineitem, unit_types_to_process, workstream, generate_t
     
     return deliverylineitem
 
+# Get the dates and quantities to use in delivery files
 def get_dates_quantities(deliverylineitem, earliest_delivery_start_date, latest_delivery_end_date):
     dates_quantities = []
     line_start_date = datetime.datetime.strptime(deliverylineitem['start_date'], "%Y-%m-%d").date()
@@ -56,6 +53,9 @@ def get_dates_quantities(deliverylineitem, earliest_delivery_start_date, latest_
     
     return dates_quantities
 
+# Define a primary delivery csv header and how to generate each row of data
+primary_delivery_csv_header = 'Production System ID,Production System Name,Delivered Date,Advertiser ID,Advertiser Name,Order ID,Order Name,Line Item ID,Line Item Name,Unit Type 1,Delivered Quantity 1,Unit Type 2,Delivered Quantity 2,Start Date,End Date,Unit Cost,Cost Method,Associated Sales Line Item ID'
+
 def get_primary_delivery_csv_row(deliverylineitem, delivery_date, quantity):
     return (
         deliverylineitem['external_system_id'] + ',' +
@@ -75,6 +75,9 @@ def get_primary_delivery_csv_row(deliverylineitem, delivery_date, quantity):
         str(deliverylineitem['unit_cost']) + ',' +
         deliverylineitem['cost_method'] + ','
     )
+
+# Define a third party delivery csv header and how to generate each row of data
+third_party_delivery_csv_header = 'Production System ID,Production System Name,Delivered Date,Advertiser ID,Advertiser Name,Order ID,Order Name,Line Item ID,Line Item Name,Unit Type 1,Delivered Quantity 1,Unit Type 2,Delivered Quantity 2,Start Date,End Date,Associated Production System ID,Associated Production System Name,Associated Line Item ID,Associated Line Item Name'
 
 def get_third_party_delivery_csv_row(deliverylineitem, delivery_date, quantity):
     return (
@@ -97,6 +100,9 @@ def get_third_party_delivery_csv_row(deliverylineitem, delivery_date, quantity):
         deliverylineitem['external_line_id'] + ',' +
         deliverylineitem['external_line_name']
     )
+
+# Define the contents csv header and how to generate each row of data
+contents_csv_header = 'Primary Production System ID,Primary Production System Name,Advertiser ID,Advertiser Name,Order ID,Order Name,Start Date,End Date,Primary Line Item Count,Third Party Line Item Count'
 
 def get_contents_csv_row(deliverylineitem, primary_line_item_count, third_party_line_item_count):
     return (
