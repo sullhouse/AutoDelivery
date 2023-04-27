@@ -22,35 +22,71 @@ def get_aos_api_connection():
 
     return aos_api_connection
 
-def get_workstreams(aos_api_connection, page_num, date_range_start_to_process, date_range_end_to_process, external_system_ids_to_process, deal_id_to_process):
+def get_workstreams_from_aos_api(aos_api_connection, page_num, date_range_start_to_process, date_range_end_to_process, external_system_ids_to_process, deal_id_to_process):
     workstream_search_filter = {"startDate":date_range_start_to_process,"endDate":date_range_end_to_process,"externalSystemIds":external_system_ids_to_process}
     if deal_id_to_process > 0: workstream_search_filter.update({"dealSequenceId": deal_id_to_process})
 
     url = 'https://' + aos_api_connection['apiurl'] + '/orders/v1/' + aos_api_connection['apikey'] + '/workstreams/_search'
     workstream_search_filter.update({"pageNumber": page_num, "pageSize": 100})
-    workstreamresponse = requests.post(url, json=workstream_search_filter, headers=aos_api_connection['headers'])
+    response = requests.post(url, json=workstream_search_filter, headers=aos_api_connection['headers'])
     #print(f"Status Code: {workstreamresponse.status_code}, Response: {workstreamresponse.json()}")
     
     # If there are workstreams return them
-    if "workstreams" in workstreamresponse.text:
-        workstreams = json.loads(workstreamresponse.text)["workstreams"]
+    if "workstreams" in response.text:
+        workstreams = json.loads(response.text)["workstreams"]
     else:
         workstreams = []
 
     return workstreams
 
-def get_lineitems(aos_api_connection, workstream_id):
+def get_lineitems_from_aos_api(aos_api_connection, workstream_id):
     url = 'https://' + aos_api_connection['apiurl'] + '/orders/v1/' + aos_api_connection['apikey'] + '/lines/_search'
-    lineitemresponse = requests.post(url, json={
+    response = requests.post(url, json={
     "workstreamId":workstream_id,
     "performanceView":True
     }, headers=aos_api_connection['headers'])
     #print(f"Status Code: {lineitemresponse.status_code}, Response: {lineitemresponse.json()}")
-    lineitems = json.loads(lineitemresponse.text)["lineItems"]
+    lineitems = json.loads(response.text)["lineItems"]
 
     return lineitems
 
-def trigger_primary_delivery_pull(aos_api_connection, delivery_source_id, filename):
+def get_deal_header_from_aos_api(aos_api_connection, deal_id):
+    url = 'https://' + aos_api_connection['apiurl'] + '/unifiedplanner/v1/' + aos_api_connection['apikey'] + '/plans/' + str(deal_id)
+    response = requests.get(url, headers=aos_api_connection['headers'])
+    #print(f"Status Code: {dealresponse.status_code}, Response: {dealresponse.json()}")
+    return json.loads(response.text)
+
+def get_deal_lineitems_from_aos_api(aos_api_connection, deal_id):
+    url = 'https://' + aos_api_connection['apiurl'] + '/unifiedplanner/v1/' + aos_api_connection['apikey'] + '/plans/' + str(deal_id) + '/workspace/digital/lines/_search'
+    response = requests.post(url, json={}, headers=aos_api_connection['headers'])
+    return json.loads(response.text)
+
+def get_external_systems_from_aos_api(aos_api_connection):
+    url = 'https://' + aos_api_connection['apiurl'] + '/mdm/v1/' + aos_api_connection['apikey'] + '/psDefinition'
+    response = requests.get(url, headers=aos_api_connection['headers'])
+    return json.loads(response.text)
+
+def get_cost_methods_from_aos_api(aos_api_connection):
+    url = 'https://' + aos_api_connection['apiurl'] + '/mdm/v1/' + aos_api_connection['apikey'] + '/costmethod'
+    response = requests.get(url, headers=aos_api_connection['headers'])
+    return json.loads(response.text)
+
+def get_unit_types_from_aos_api(aos_api_connection):
+    url = 'https://' + aos_api_connection['apiurl'] + '/mdm/v1/' + aos_api_connection['apikey'] + '/unittype'
+    response = requests.get(url, headers=aos_api_connection['headers'])
+    return json.loads(response.text)
+
+def get_products_from_aos_api(aos_api_connection):
+    url = 'https://' + aos_api_connection['apiurl'] + '/products/v1/' + aos_api_connection['apikey'] + '/productList?pageSize=10000'
+    response = requests.get(url, headers=aos_api_connection['headers'])
+    return json.loads(response.text)
+
+def get_packages_from_aos_api(aos_api_connection):
+    url = 'https://' + aos_api_connection['apiurl'] + '/products/v1/' + aos_api_connection['apikey'] + '/productgroups/_search'
+    response = requests.post(url, json={"fetchTemplatizedOnly": True}, headers=aos_api_connection['headers'])
+    return json.loads(response.text)
+
+def trigger_primary_delivery_pull_aos_api(aos_api_connection, delivery_source_id, filename):
      # Trigger primary delivery pull via API
     url = 'https://' + aos_api_connection['apiurl'] + '/ingress/v2/' + aos_api_connection['apikey'] + '/ingest/inlinePayload'
     response = requests.post(url, json={
@@ -79,7 +115,7 @@ def trigger_primary_delivery_pull(aos_api_connection, delivery_source_id, filena
         }, headers=aos_api_connection['headers'])
     print(f"Status Code: {response.status_code}, Response: {response.json()}")
 
-def trigger_third_party_delivery_pull(aos_api_connection, delivery_source_id, filename):
+def trigger_third_party_delivery_pull_aos_api(aos_api_connection, delivery_source_id, filename):
     url = 'https://' + aos_api_connection['apiurl'] + '/ingress/v2/' + aos_api_connection['apikey'] + '/ingest/inlinePayload'
     response = requests.post(url, json={
             "callBackUrl": "",
