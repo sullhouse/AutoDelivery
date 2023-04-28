@@ -44,32 +44,33 @@ while True:
     for workstream in workstreams:
         if workstream['dealSequenceId'] not in deal_ids_for_dealdata: deal_ids_for_dealdata.append(workstream['dealSequenceId'])
 
-        deliverydata = []
+        if generate_primary_delivery or generate_third_party_delivery:
+            deliverydata = []
 
-        # Get line item data in this workstream
-        lineitems = get_lineitems_from_aos_api(aos_api_connection, workstream['id'])
-        for lineitem in lineitems:
-            deliverylineitem = get_deliverylineitem(lineitem, unit_types_to_process, workstream, generate_third_party_delivery)
-            if deliverylineitem is not None:
-                deliverydata.append(deliverylineitem)
+            # Get line item data in this workstream
+            lineitems = get_lineitems_from_aos_api(aos_api_connection, workstream['id'])
+            for lineitem in lineitems:
+                deliverylineitem = get_deliverylineitem(lineitem, unit_types_to_process, workstream, generate_third_party_delivery)
+                if deliverylineitem is not None:
+                    deliverydata.append(deliverylineitem)
 
-        # Generate delivery data for each line item
-        primary_line_item_count = 0
-        third_party_line_item_count = 0
+            # Generate delivery data for each line item
+            primary_line_item_count = 0
+            third_party_line_item_count = 0
 
-        for deliverylineitem in deliverydata:
-            dates_quantities = get_dates_quantities(deliverylineitem, earliest_delivery_start_date, latest_delivery_end_date)
-            if generate_primary_delivery: primary_line_item_count += 1
-            if generate_third_party_delivery and 'third_party_system_id' in deliverylineitem: third_party_line_item_count +=1
+            for deliverylineitem in deliverydata:
+                dates_quantities = get_dates_quantities(deliverylineitem, earliest_delivery_start_date, latest_delivery_end_date)
+                if generate_primary_delivery: primary_line_item_count += 1
+                if generate_third_party_delivery and 'third_party_system_id' in deliverylineitem: third_party_line_item_count +=1
 
-            for date_quantity in dates_quantities:
-                if generate_primary_delivery: primary_deliverydata.append(get_primary_delivery_csv_row(deliverylineitem, date_quantity['delivery_date'], date_quantity['primary_quantity']))
-                if generate_third_party_delivery and 'third_party_system_id' in deliverylineitem: third_party_deliverydata.append(get_third_party_delivery_csv_row(deliverylineitem, date_quantity['delivery_date'], date_quantity['third_party_quantity']))
-                    
-        # Log the contents
-        if bool(deliverydata): 
-            contents.append(get_contents_csv_row(deliverylineitem, primary_line_item_count, third_party_line_item_count))
-            print(contents[-1])
+                for date_quantity in dates_quantities:
+                    if generate_primary_delivery: primary_deliverydata.append(get_primary_delivery_csv_row(deliverylineitem, date_quantity['delivery_date'], date_quantity['primary_quantity']))
+                    if generate_third_party_delivery and 'third_party_system_id' in deliverylineitem: third_party_deliverydata.append(get_third_party_delivery_csv_row(deliverylineitem, date_quantity['delivery_date'], date_quantity['third_party_quantity']))
+                        
+            # Log the contents
+            if bool(deliverydata): 
+                contents.append(get_contents_csv_row(deliverylineitem, primary_line_item_count, third_party_line_item_count))
+                print(contents[-1])
 
 # Upload delivery data as csv to AOS FTP
 suffix = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -82,8 +83,8 @@ if call_aos_data_pull and generate_primary_delivery: trigger_primary_delivery_pu
 if call_aos_data_pull and generate_third_party_delivery: trigger_third_party_delivery_pull_aos_api(aos_api_connection, delivery_source_id, third_party_delivery_filename)
 
 # Upload delivery data to Staq
-if generate_primary_delivery and upload_data_to_staq: upload_file_to_ftp(aos_api_connection['tenantname'] + '_Primary', suffix, primary_deliverydata, delete_from_local_after_upload, 'staq_ftp_primary')
-if generate_third_party_delivery and upload_data_to_staq: upload_file_to_ftp(aos_api_connection['tenantname'] + '_ThirdParty', suffix, third_party_deliverydata, delete_from_local_after_upload, 'staq_ftp_third_party')
+if generate_primary_delivery and upload_delivery_data_to_staq: upload_file_to_ftp(aos_api_connection['tenantname'] + '_Primary', suffix, primary_deliverydata, delete_from_local_after_upload, 'staq_ftp_primary')
+if generate_third_party_delivery and upload_delivery_data_to_staq: upload_file_to_ftp(aos_api_connection['tenantname'] + '_ThirdParty', suffix, third_party_deliverydata, delete_from_local_after_upload, 'staq_ftp_third_party')
 
 # Get and upload latest deal data for Staq
-if upload_data_to_staq: deal_data_filename = upload_file_to_ftp('DealData', suffix, get_deal_data_csv_all(get_aos_api_connection(),deal_ids_for_dealdata), delete_from_local_after_upload, 'staq_ftp_deal_data')
+if update_deal_data_to_staq: deal_data_filename = upload_file_to_ftp('DealData', suffix, get_deal_data_csv_all(get_aos_api_connection(),deal_ids_for_dealdata), delete_from_local_after_upload, 'staq_ftp_deal_data')

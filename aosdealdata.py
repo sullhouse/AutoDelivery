@@ -16,29 +16,36 @@ def get_deal_data(aos_api_connection,deal_id):
 def get_deal_header_csv_row(deal_header):
     deal_data_csv_row = (
         str(deal_header['planId']) + ',' +
-        deal_header['planName'] + ',' +
-        deal_header['orderType']['name'] + ','
+        strForCSV(deal_header['planName']) + ',' +
+        strForCSV(deal_header['orderType']['name']) + ','
     )
     
-    deal_data_csv_row += ('"' + deal_header['advertisers'][0]['name'] + '",')
+    deal_data_csv_row += ('"' + strForCSV(deal_header['advertisers'][0]['name']) + '",')
     deal_data_csv_row += (deal_header['advertisers'][0]['id'] + ',')
     
     try:
-        if ',' in deal_header['agencies'][0]['name']:
-            deal_data_csv_row += ('"' + deal_header['agencies'][0]['name'] + '",')
-        else:
-            deal_data_csv_row += (deal_header['agencies'][0]['name'] + ',')
+        deal_data_csv_row += (strForCSV(deal_header['agencies'][0]['name']) + ',')
+    except IndexError:
+        deal_data_csv_row += ','
+    except TypeError:
+        deal_data_csv_row += ','
+
+    try:
         deal_data_csv_row += deal_header['agencies'][0]['mdmId'] + ','
     except IndexError:
-        deal_data_csv_row += ',,'
+        deal_data_csv_row += ','
+    except TypeError:
+        deal_data_csv_row += ','
 
     deal_data_csv_row += (
-        str(deal_header['accountExecutives'][0]['name']) + ','
+        strForCSV(deal_header['accountExecutives'][0]['name']) + ','
     )
 
     try:
-        deal_data_csv_row += (deal_header['accountExecutives'][0]['team']['name'] + ',')
+        deal_data_csv_row += (strForCSV(deal_header['accountExecutives'][0]['team']['name']) + ',')
     except KeyError:
+        deal_data_csv_row += ','
+    except TypeError:
         deal_data_csv_row += ','
 
     deal_data_csv_row += (
@@ -61,6 +68,8 @@ def get_deal_header_csv_row(deal_header):
     try:
         deal_data_csv_row += (deal_header['digitalRatecards'][0]['name'] + ',')
     except IndexError:
+        deal_data_csv_row += ','
+    except TypeError:
         deal_data_csv_row += ','
 
     deal_data_csv_row += (
@@ -88,13 +97,27 @@ def get_deal_lineitems_csv_row(lineitem, deal_helper_data):
             parent_line_id = "None"
         else:
             parent_line_id = str(next(item for item in deal_helper_data['group_lineitem_ids'] if item['id'] == lineitem['planWorkspaceProduct']['packageLineId'])['sequenceId'])
+    
+    try:
+        cost_method_name = str(next(item for item in deal_helper_data['cost_methods'] if item['id'] == lineitem['rates']['costMethodId'])['name'])
+    except StopIteration:
+        cost_method_name = "n/a"
+    except TypeError:
+        cost_method_name = "n/a"
+    
+    try:
+        unit_type_name = str(next(item for item in deal_helper_data['unit_types'] if item['id'] == lineitem['rates']['unitTypeId'])['name'])
+    except StopIteration:
+        unit_type_name = "n/a"
+    except TypeError:
+        unit_type_name = "n/a"
 
     lineintem_csv_row = ("" +
         str(lineitem['sequenceId']) + ',' +
-        str(lineitem['name']) + ',' +
+        strForCSV(lineitem["name"]) + ',' +
         thirdparty_billable_ad_server + ',' +
-        str(next(item for item in deal_helper_data['cost_methods'] if item['id'] == lineitem['rates']['costMethodId'])['name']) + ',' +
-        str(next(item for item in deal_helper_data['unit_types'] if item['id'] == lineitem['rates']['unitTypeId'])['name']) + ',' +
+        cost_method_name + ',' +
+        unit_type_name + ',' +
         str(lineitem['rates']['quantity']) + ',' +
         str(lineitem['rates']['sov']) + ',' +
         str(lineitem['rates']['productionQuantity']) + ',' +
@@ -148,8 +171,12 @@ def get_deal_data_csv_rows(aos_api_connection, deal_id):
     deal_header_csv = get_deal_header_csv_row(deal_data['deal_header'])
     deal_data_csv = []
     deal_helper_data = get_deal_helper_data(aos_api_connection, deal_data)
-    for lineitem in deal_data['deal_lineitems']:
-        deal_data_csv_row = deal_header_csv + ',' + get_deal_lineitems_csv_row(lineitem, deal_helper_data)
+    if deal_data['deal_lineitems']:
+        for lineitem in deal_data['deal_lineitems']:
+            deal_data_csv_row = deal_header_csv + ',' + get_deal_lineitems_csv_row(lineitem, deal_helper_data)
+            deal_data_csv.append(deal_data_csv_row)
+    else:
+        deal_data_csv_row = deal_header_csv + ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,'
         deal_data_csv.append(deal_data_csv_row)
 
     return deal_data_csv
@@ -160,8 +187,10 @@ def get_deal_data_csv_header():
 def get_deal_data_csv_all(aos_api_connection, deal_ids):
     deal_data = []
     deal_data.append(get_deal_data_csv_header())
+    print(deal_data[-1])
     for deal_id in deal_ids:
         deal_data.extend(get_deal_data_csv_rows(aos_api_connection, deal_id))
+        print(deal_data[-1])
 
     return deal_data
 
@@ -177,3 +206,8 @@ def get_deal_helper_data(aos_api_connection, deal_data):
         if lineitem['packageLine']: deal_helper_data['group_lineitem_ids'].append({"sequenceId": lineitem['sequenceId'], "id": lineitem['id']})
     
     return deal_helper_data
+
+def strForCSV(s):
+    s = s.replace("\"", "\\\"")
+    s = f'"{s}"'
+    return s

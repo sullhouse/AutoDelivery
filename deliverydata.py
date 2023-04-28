@@ -27,7 +27,9 @@ def get_deliverylineitem(lineitem, unit_types_to_process, workstream, generate_t
             deliverylineitem['third_party_system_id'] = lineitem['thirdPartyBillableAdServer']['id']
             deliverylineitem['third_party_system_name'] = lineitem['thirdPartyBillableAdServer']['name']
     
-    return deliverylineitem
+        return deliverylineitem
+    
+    return None
 
 # Get the dates and quantities to use in delivery files
 def get_dates_quantities(deliverylineitem, earliest_delivery_start_date, latest_delivery_end_date):

@@ -59,7 +59,10 @@ def get_deal_header_from_aos_api(aos_api_connection, deal_id):
 def get_deal_lineitems_from_aos_api(aos_api_connection, deal_id):
     url = 'https://' + aos_api_connection['apiurl'] + '/unifiedplanner/v1/' + aos_api_connection['apikey'] + '/plans/' + str(deal_id) + '/workspace/digital/lines/_search'
     response = requests.post(url, json={}, headers=aos_api_connection['headers'])
-    return json.loads(response.text)
+    if response.text:
+        return json.loads(response.text)
+    else:
+        return {}
 
 def get_external_systems_from_aos_api(aos_api_connection):
     url = 'https://' + aos_api_connection['apiurl'] + '/mdm/v1/' + aos_api_connection['apikey'] + '/psDefinition'
