@@ -7,7 +7,7 @@ external_system_ids_to_process = ['O9xQrQzFTqS1aPxRvMzVYA','028f9FSdSAKd6ZEhyrJt
 unit_types_to_process = ['impressions','clicks']
 date_range_start_to_process = '2023-01-01'
 date_range_end_to_process = '2023-04-30'
-deal_id_to_process = 0 # set to 0 to process all deals
+deal_id_to_process = 564 # set to 0 to process all deals
 
 # Set delivery data to populate
 previous_days = 0 # set to 0 to process for date range below

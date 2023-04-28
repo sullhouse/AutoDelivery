@@ -20,7 +20,7 @@ def get_deal_header_csv_row(deal_header):
         strForCSV(deal_header['orderType']['name']) + ','
     )
     
-    deal_data_csv_row += ('"' + strForCSV(deal_header['advertisers'][0]['name']) + '",')
+    deal_data_csv_row += (strForCSV(deal_header['advertisers'][0]['name']) + ',')
     deal_data_csv_row += (deal_header['advertisers'][0]['id'] + ',')
     
     try:
@@ -74,10 +74,10 @@ def get_deal_header_csv_row(deal_header):
 
     deal_data_csv_row += (
         str(deal_header['planStatus']['statusName']) + ',' +
-        '"' + deal_header['audit']['lastModifiedDate'] + '",' +
+        strForCSV(deal_header['audit']['lastModifiedDate']) + ',' +
         deal_header['audit']['lastModifiedBy'] + ',' +
         deal_header['audit']['createdBy'] + ',' +
-        '"' + deal_header['audit']['createdDate'] + '"'
+        strForCSV(deal_header['audit']['createdDate'])
     )
 
     return deal_data_csv_row
@@ -158,9 +158,9 @@ def get_deal_lineitems_csv_row(lineitem, deal_helper_data):
         str(lineitem['planWorkspaceProduct']['packageType']) + ',' +
         str(lineitem['orderStatus']['salesLineStatus']) + ',' +
         str(lineitem['financeStatus']['financeLineStatus']) + ',' +
-        '"' + lineitem['lastModifiedDate'] + '",' +
+        strForCSV(lineitem['lastModifiedDate']) + ',' +
         lineitem['lastModifiedBy'] + ',' +
-        '"' + lineitem['createdDate'] + '",' +
+        strForCSV(lineitem['createdDate']) + ',' +
         lineitem['createdBy']
     )
 
