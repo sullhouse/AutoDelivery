@@ -39,7 +39,7 @@ while True:
     page_num += 1
     
     # Get workstream data
-    workstreams = get_workstreams_from_aos_api(aos_api_connection, page_num, date_range_start_to_process, date_range_end_to_process, external_system_ids_to_process, deal_id_to_process_delivery)
+    workstreams = get_workstreams_from_aos_api(aos_api_connection, page_num, earliest_delivery_start_date, latest_delivery_end_date, external_system_ids_to_process, deal_id_to_process_delivery)
     if len(workstreams)==0: break
     for workstream in workstreams:
         if workstream['dealSequenceId'] not in deal_ids_for_dealdata: deal_ids_for_dealdata.append(workstream['dealSequenceId'])

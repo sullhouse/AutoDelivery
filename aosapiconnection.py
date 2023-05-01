@@ -26,7 +26,7 @@ def get_workstreams_from_aos_api(aos_api_connection, page_num, date_range_start_
     if deal_id_to_process_delivery > 0:
         workstream_search_filter = {"externalSystemIds":external_system_ids_to_process,"dealSequenceId": deal_id_to_process_delivery}
     else:
-        workstream_search_filter = {"externalSystemIds":external_system_ids_to_process,"startDate":date_range_start_to_process,"endDate":date_range_end_to_process}
+        workstream_search_filter = {"externalSystemIds":external_system_ids_to_process,"startDate":str(date_range_start_to_process),"endDate":str(date_range_end_to_process)}
 
     url = 'https://' + aos_api_connection['apiurl'] + '/orders/v1/' + aos_api_connection['apikey'] + '/workstreams/_search'
     workstream_search_filter.update({"pageNumber": page_num, "pageSize": 100})
