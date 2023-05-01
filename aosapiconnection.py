@@ -22,9 +22,11 @@ def get_aos_api_connection():
 
     return aos_api_connection
 
-def get_workstreams_from_aos_api(aos_api_connection, page_num, date_range_start_to_process, date_range_end_to_process, external_system_ids_to_process, deal_id_to_process):
-    workstream_search_filter = {"startDate":date_range_start_to_process,"endDate":date_range_end_to_process,"externalSystemIds":external_system_ids_to_process}
-    if deal_id_to_process > 0: workstream_search_filter.update({"dealSequenceId": deal_id_to_process})
+def get_workstreams_from_aos_api(aos_api_connection, page_num, date_range_start_to_process, date_range_end_to_process, external_system_ids_to_process, deal_id_to_process_delivery):
+    if deal_id_to_process_delivery > 0:
+        workstream_search_filter = {"externalSystemIds":external_system_ids_to_process,"dealSequenceId": deal_id_to_process_delivery}
+    else:
+        workstream_search_filter = {"externalSystemIds":external_system_ids_to_process,"startDate":date_range_start_to_process,"endDate":date_range_end_to_process}
 
     url = 'https://' + aos_api_connection['apiurl'] + '/orders/v1/' + aos_api_connection['apikey'] + '/workstreams/_search'
     workstream_search_filter.update({"pageNumber": page_num, "pageSize": 100})
@@ -38,6 +40,20 @@ def get_workstreams_from_aos_api(aos_api_connection, page_num, date_range_start_
         workstreams = []
 
     return workstreams
+
+def get_deal_ids_from_aos_api(aos_api_connection, deal_modified_start_date, deal_modified_end_date):
+    date_range = str(deal_modified_start_date) + " - " + str(deal_modified_end_date)
+    deal_search_filter = {"lastModifiedDate":date_range}
+
+    url = 'https://' + aos_api_connection['apiurl'] + '/unifiedplanner/v1/' + aos_api_connection['apikey'] + '/plans/_filter?offset=0&limit=500&sortBy=lastModifiedDate&sortOrder=-1'
+    response = requests.post(url, json=deal_search_filter, headers=aos_api_connection['headers'])
+    
+    deal_list = json.loads(response.text)["planESList"]
+    deal_ids = []
+    for deal in deal_list:
+        deal_ids.append(deal['planId'])
+    
+    return deal_ids
 
 def get_lineitems_from_aos_api(aos_api_connection, workstream_id):
     url = 'https://' + aos_api_connection['apiurl'] + '/orders/v1/' + aos_api_connection['apikey'] + '/lines/_search'
