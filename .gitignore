@@ -1,4 +1,5 @@
 aosapicredentials.json
 ftpcredentials.json
+autodelivery_config.py
 .vscode/*
 __pycache__/*
