@@ -39,7 +39,7 @@ while True:
     page_num += 1
     
     # Get workstream data
-    workstreams = get_workstreams_from_aos_api(aos_api_connection, page_num, date_range_start_to_process, date_range_end_to_process, external_system_ids_to_process, deal_id_to_process)
+    workstreams = get_workstreams_from_aos_api(aos_api_connection, page_num, date_range_start_to_process, date_range_end_to_process, external_system_ids_to_process, deal_id_to_process_delivery)
     if len(workstreams)==0: break
     for workstream in workstreams:
         if workstream['dealSequenceId'] not in deal_ids_for_dealdata: deal_ids_for_dealdata.append(workstream['dealSequenceId'])
@@ -87,4 +87,10 @@ if generate_primary_delivery and upload_delivery_data_to_staq: upload_file_to_ft
 if generate_third_party_delivery and upload_delivery_data_to_staq: upload_file_to_ftp(aos_api_connection['tenantname'] + '_ThirdParty', suffix, third_party_deliverydata, delete_from_local_after_upload, 'staq_ftp_third_party')
 
 # Get and upload latest deal data for Staq
-if update_deal_data_to_staq: deal_data_filename = upload_file_to_ftp('DealData', suffix, get_deal_data_csv_all(get_aos_api_connection(),deal_ids_for_dealdata), delete_from_local_after_upload, 'staq_ftp_deal_data')
+if update_deal_data_to_staq: 
+    if not update_all_deal_data_with_delivery:
+        if deal_modified_previous_days > 0:
+            deal_modified_start_date = datetime.date.today() - datetime.timedelta(days=deal_modified_previous_days)
+            deal_modified_end_date = datetime.date.today()
+        deal_ids_for_dealdata = get_deal_ids_from_aos_api(aos_api_connection, deal_modified_start_date, deal_modified_end_date)
+    deal_data_filename = upload_file_to_ftp('DealData', suffix, get_deal_data_csv_all(aos_api_connection,deal_ids_for_dealdata), delete_from_local_after_upload, 'staq_ftp_deal_data')
