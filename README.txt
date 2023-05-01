@@ -1,7 +1,7 @@
 AutoDelivery is a script that is meant to be run either ad hoc or on a scheduled basis to create random but realistic performance data in AOS and Staq for existing fake Deals, Orders and Invoices. Today it is configurable to run against a specified set of deals, or all deals, for specified external systems and unit types, and for business in a specified date range. The delivery data to generate can be either a previous set of days (useful if the job is scheduled, every day generate new data for the previous day) or a date range (useful to populate all delivery for an entire deal).
 
 General Config
-1.  Configure autodelivery_config.py according to comments and desired usage
+1.  Configure SAMPLE_autodelivery_config.py according to comments and desired usage and save as "autodelivery_config.py" (remove SAMPLE_ prefix)
 
 AOS API Access
 1.  Create a user with API access to the AOS tenant and get the API key for that user
