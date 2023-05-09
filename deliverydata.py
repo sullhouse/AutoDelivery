@@ -22,6 +22,7 @@ def get_deliverylineitem(lineitem, unit_types_to_process, workstream, generate_t
             'external_line_id': lineitem['externalAds'][0]['externalId'],
             'external_order_name': f'"{workstream["orderName"]}"' if ',' in workstream['orderName'] else workstream['orderName'],
             'external_line_name': f'"{lineitem["name"]}"' if ',' in lineitem['name'] else lineitem['name'],
+            'associated_sales_lineitem_id': lineitem['dealLineSequenceId']
         }
         if generate_third_party_delivery and 'thirdPartyBillableAdServer' in lineitem:
             deliverylineitem['third_party_system_id'] = lineitem['thirdPartyBillableAdServer']['id']
@@ -75,7 +76,8 @@ def get_primary_delivery_csv_row(deliverylineitem, delivery_date, quantity):
         deliverylineitem['start_date'] + ',' +
         deliverylineitem['end_date'] + ',' +        
         str(deliverylineitem['unit_cost']) + ',' +
-        deliverylineitem['cost_method'] + ','
+        deliverylineitem['cost_method'] + ',' +
+        deliverylineitem['associated_sales_lineitem_id']
     )
 
 # Define a third party delivery csv header and how to generate each row of data
